@@ -1,0 +1,11 @@
+.img-responsive {
+    height: auto;
+    width: auto;
+    max-height: 24px;
+    max-width: 30px;
+    margin-right: 10px;
+}
+
+.iconNavbar {
+    margin-right: 1rem;
+}

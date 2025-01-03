@@ -1,0 +1,15 @@
+.img-max {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+
+input[type="file"] {
+    display: none;
+  }
+
+  .uploadButton {
+    max-width: 200px;
+    width: 200px;
+    margin-top: 1rem;
+  }

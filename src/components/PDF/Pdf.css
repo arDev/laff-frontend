@@ -1,0 +1,9 @@
+.page {
+  flex-direction: row;
+  background-color: red
+}
+
+.section {
+  margin: 1rem;
+  padding: 1rem;
+}

@@ -1,0 +1,12 @@
+textarea {
+    resize: none;
+  }
+
+  .escudo {
+    width: 200px;
+    height: 200px;
+  
+  }
+  .escudo-col {
+    text-align: center;
+  }
