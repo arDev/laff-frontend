@@ -3,14 +3,11 @@ import { IEquipo } from "../../interfaces/IEquipo";
 import { useState } from "react";
 import { useEquipos } from "../../customHook/useEquipos";
 import Busqueda from "../Busqueda/Busqueda";
-//import FichaEquipo from "./FichaEquipo_bak";
 import { Link, useNavigate } from "react-router";
 
 function Equipos() {
     const navigate = useNavigate();
     const [busqueda, setBusqueda] = useState<string>("")
-
-    const [equipo, setEquipo] = useState<IEquipo>()
 
     const { equipos } = useEquipos(busqueda);
 
@@ -25,12 +22,6 @@ function Equipos() {
     }
 
     const handleClickNuevo = () => {
-        setEquipo({
-            id: 0,
-            nombre: "",
-            orden: 0,
-            detalles: "",
-        });
         navigate("/equipos/nuevo")
     }
 
@@ -46,7 +37,7 @@ function Equipos() {
                 />
                 <div className="mb-4">
                     Se encontraron {equipos.length} resultados
-                    <button className="btn btn-primary float-end"  onClick={() => handleClickNuevo()} >Nuevo</button>
+                    <button className="btn btn-primary float-end" onClick={() => handleClickNuevo()} >Nuevo</button>
                 </div>
                 <hr />
                 <table className="table">
@@ -68,7 +59,14 @@ function Equipos() {
                                     <td>{equipo.nombre}</td>
                                     <td>{equipo.orden}</td>
                                     <td>{equipo.detalles}</td>
-                                    <td><Link to="/equipos/nuevo" className="btn btn-secondary float-end" state={{ equipo : equipo }} > Editar</Link></td>
+                                    <td>
+                                    <div className="float-end">
+                                            <Link to="/equipos/nuevo" className="btn btn-secondary me-1  " state={{ equipo: equipo }} ><i className="bi bi-pencil-square"></i></Link>
+                                            <button type="button" className="btn btn-danger float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                <i className="bi bi-arrow-down-square"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))
                         }

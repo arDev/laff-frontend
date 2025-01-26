@@ -6,9 +6,6 @@ import { useEffect, useState } from "react";
 import "./FichaEquipo.css"
 import AsyncSelect from "react-select/async";
 //import escudo from "../../assets/sinImagen.jpg"
-
-
-import { useJugadores } from "../../customHook/useJugadores";
 import FileResizer from "react-image-file-resizer";
 import { ErrorMessage } from "@hookform/error-message";
 import Requerido from "../MsgCampos/Requerido";

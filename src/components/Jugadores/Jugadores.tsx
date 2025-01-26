@@ -3,16 +3,15 @@ import Busqueda from "../Busqueda/Busqueda";
 import { useJugadores } from "../../customHook/useJugadores";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { IPersona } from "../../interfaces/IPersona";
-import FichaPersona from "./FichaPersona";
+import { Link, useNavigate } from "react-router";
 //import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 //import Pdf from "../PDF/Pdf";
 
 
 function Jugadores() {
 
+    const navigate = useNavigate();
     const [busqueda, setBusqueda] = useState<string>("")
-
-    const [persona, setPersona] = useState<IPersona>()
 
     const { jugadores } = useJugadores(busqueda);
 
@@ -26,11 +25,8 @@ function Jugadores() {
         }
     }
 
-    const handleClickModificacion = (persona: IPersona) => {
-        setPersona(persona);
-    }
-
     const handleClickNuevo = () => {
+        { /*
         setPersona({
             id: 0,
             apellido: "",
@@ -44,9 +40,12 @@ function Jugadores() {
             carnet: 0,
             email: "",
             observaciones: "",
-            value:"", 
-            label:""
-        });
+            value: "",
+            label: "",
+            deBase: 0
+        }); */ }
+
+        navigate("/jugadores/nuevo")
     }
 
     return (
@@ -59,7 +58,7 @@ function Jugadores() {
                 />
                 <div className="mb-4">
                     Se encontraron {jugadores.length} resultados
-                    <button className="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => handleClickNuevo()}>Nuevo</button>
+                    <button className="btn btn-primary float-end" onClick={() => handleClickNuevo()} >Nuevo</button>
                 </div>
                 <hr />
                 <table className="table">
@@ -83,10 +82,9 @@ function Jugadores() {
                                     <td>{jugador.carnet}</td>
                                     <td>
                                         <div className="float-end">
-                                            <button type="button" className="btn btn-warning iconNavbar" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => handleClickModificacion(jugador)}>
-                                                <i className="bi bi-pencil-square"></i>
-                                            </button>
-                                            <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                            <Link to="/jugadores/nuevo" className="btn btn-secondary me-1  " state={{ persona: jugador }} ><i className="bi bi-pencil-square"></i></Link>
+                                            <Link to="/carnet" className="btn btn-secondary me-1 " state={{ persona: jugador }} ><i className="bi bi-person-vcard"></i></Link>
+                                            <button type="button" className="btn btn-danger float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                                 <i className="bi bi-arrow-down-square"></i>
                                             </button>
                                         </div>
@@ -98,17 +96,8 @@ function Jugadores() {
                     </tbody>
                 </table>
             </div>
-            { /*
-            <PDFDownloadLink document={<Pdf />} fileName='invoice.pdf'>
-                <div >
-                    <span>Download</span>
-                </div>
-            </PDFDownloadLink>
-            <PDFViewer width={800}>
-                <Pdf />
-            </PDFViewer>*/
-        }
-            <FichaPersona persona={persona} /> 
+
+            { /*            <FichaPersona persona={persona} /> */}
         </section >
 
     )

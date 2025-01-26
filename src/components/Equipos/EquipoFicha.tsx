@@ -130,7 +130,7 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
             headers: myHeaders,
         };
 
-        const response = await fetch("http://localhost/laff/api.php?request=persona&filtro=" + inputValue, requestOptions)
+        const response = await fetch("http://localhost/laff/api.php?request=persona_sinequipo&filtro=" + inputValue, requestOptions)
         const data = await response.json()
 
         return data
@@ -271,6 +271,7 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
         return;
     }
 
+    
     return (
         <section className="mt-4">
             <div className="container">
