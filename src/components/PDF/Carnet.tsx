@@ -6,7 +6,9 @@ const Carnet = () => {
 
     const location = useLocation(); // useLocation para acceder al estado
     const { persona } = location.state || {}; // Accede al estado pasado
-
+    
+    console.log(persona)
+    
     return (
         <div className="container">
             <PDFViewer width={800} height={800}>

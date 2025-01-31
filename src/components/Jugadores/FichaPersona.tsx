@@ -92,7 +92,7 @@ const FichaPersona = ({ personaParam }: FichaJug) => {
 
     const location = useLocation(); // useLocation para acceder al estado
     const { persona } = location.state || {};
-
+    console.log(persona)
     useEffect(() => {
         reset(personaParam ?? persona)
         setUrl(imagen)
