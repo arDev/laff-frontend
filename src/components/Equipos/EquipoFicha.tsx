@@ -1,44 +1,44 @@
+import { Link, useLocation, useNavigate } from "react-router";
 import { ErrorMessage } from "@hookform/error-message"
+import { SetStateAction, useEffect, useRef, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import AsyncSelect from "react-select/async"
 import Requerido from "../MsgCampos/Requerido"
-import { useEffect, useRef, useState } from "react";
 import { IEquipo } from "../../interfaces/IEquipo";
-import { SubmitHandler, useForm } from "react-hook-form";
 import FileResizer from "react-image-file-resizer";
-import { Link, useLocation, useNavigate } from "react-router";
 import { IPersona } from "../../interfaces/IPersona";
 import { SelectInstance } from "react-select";
 import blackImg from "../../assets/sinImagen.jpg"
-
 import "./EquipoFicha.css"
+import { useEquipo } from "../../customHook/useEquipo";
+import { useDivisiones } from "../../customHook/useDivisiones"
+import { appSetting } from "../../settings/appSettings";
+import useAPI from "../../customHook/useAPI";
 
 type FichaEquip = {
     equipoParam?: IEquipo
 }
 
-type tCargo = {
-    cargo: string,
-    id: number,
-    label: string
-}
-
 const EquipoFicha = ({ equipoParam }: FichaEquip) => {
-    const dtObj = { value: 0, label: "Sin Dt, seleccione uno" }
-    const delObj = { value: 0, label: "Sin Delegado, seleccione un delegado" }
-
-    const navigate = useNavigate();
+    const { callFetch } = useAPI<IEquipo>();
     const asyncRef = useRef<SelectInstance | null>(null);
-    const [file, setFile] = useState<string>();
-
-    const [dtSelect, setDtSelect] = useState(dtObj)
-    const [delegado1, setDelegado1] = useState(delObj)
-    const [delegado2, setDelegado2] = useState(delObj)
-
-    const [jugadores, setJugadores] = useState<IPersona[]>([])
+    const navigate = useNavigate()
+    const { divisiones } = useDivisiones()
+    //const [jugadores, setJugadores] = useState<IPersona[]>([])
     const [jugador, setJugador] = useState<number>(0)
 
     const location = useLocation(); // useLocation para acceder al estado
     const { equipo } = location.state || {}; // Accede al estado pasado
+
+    const { dtSelect, setDtSelect, delegado1
+        , setDelegado1, delegado2, setDelegado2
+        , jugadores
+        , file, setFile, setJugadores,
+        division, setDivision } = useEquipo(equipoParam ?? equipo)
+
+    const manejarCambio = (evento: { target: { value: SetStateAction<string>; }; }) => {
+        setDivision(Number(evento.target.value));
+    };
 
     const {
         register,
@@ -53,84 +53,25 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
 
     useEffect(() => {
         reset(equipoParam ?? equipo)
-        cargarDelegados();
-        cargarEscudo();
-        cargarJugadores();
+        console.log(jugadores)
     }, [equipo])
-
-    const cargarJugadores = () => {
-        if (equipo == undefined)
-            return
-
-        //hacer la magia
-        const requestOptions = {
-            method: "GET"
-        };
-
-        fetch("http://localhost/laff/api.php?request=equipo_get_jugadores&id=" + equipo.id, requestOptions)
-            .then((response) => response.json())
-            .then((resultados) => {
-                    setJugadores(resultados)
-                })
-            .catch((error) => console.error(error));
-    }
-
-    const cargarEscudo = () => {
-        if (equipo == undefined)
-            return
-
-        //hacer la magia
-        const requestOptions = {
-            method: "GET"
-        };
-
-        fetch("http://localhost/laff/api.php?request=escudo&id=" + equipo.id, requestOptions)
-            .then((response) => response.json())
-            .then((escudo) => {
-                    setFile(escudo[0].imagen)
-                })
-            .catch((error) => console.error(error));
-    }
-
-    const cargarDelegados = () => {
-        setDtSelect(dtObj)
-        setDelegado1(delObj)
-        setDelegado2(delObj)
-
-        if (equipo == undefined)
-            return
-
-        const requestOptions = {
-            method: "GET"
-        };
-
-        fetch("http://localhost/laff/api.php?request=equipo_get_delegados&id=" + equipo.id, requestOptions)
-            .then((response) => response.json())
-            .then((delegados) => {
-                delegados.map((item: tCargo) => {
-                    if (item.cargo == "dt")
-                        setDtSelect({ value: item.id, label: item.label })
-                    if (item.cargo == "del")
-                        setDelegado1({ value: item.id, label: item.label })
-                    if (item.cargo == "del2")
-                        setDelegado2({ value: item.id, label: item.label })
-                })
-            })
-            .catch((error) => console.error(error));
-    }
 
     const loadOptions = async (inputValue: string) => {
         if (!inputValue) return [];
 
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
+        myHeaders.append(
+            "Authorization",
+            "Bearer " + localStorage.getItem("token")
+        );
 
         const requestOptions = {
             method: "GET",
             headers: myHeaders,
         };
 
-        const response = await fetch("http://localhost/laff/api.php?request=persona_sinequipo&filtro=" + inputValue, requestOptions)
+        const response = await fetch(appSetting.urlApi + "/laff/api.php?request=persona_sinequipo&filtro=" + inputValue, requestOptions)
         const data = await response.json()
 
         return data
@@ -139,28 +80,28 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
     const setSelectedOption = (e: any, combo: string) => {
         if (e === null) {
             if (combo == "dt")
-                setDtSelect(dtObj)
+                setDtSelect({ value: 0, label: "Seleccione un dt", nroDoc: "" })
             if (combo == "d1")
-                setDelegado1(delObj)
+                setDelegado1({ value: 0, label: "Seleccione un delegado", nroDoc: "" })
             if (combo == "d2")
-                setDelegado2(delObj)
+                setDelegado2({ value: 0, label: "Seleccione un delegado", nroDoc: "" })
             if (combo == "jugador")
                 setJugador(0)
             return;
         }
         if (combo == "dt")
-            setDtSelect({ value: e.value, label: e.label })
+            setDtSelect({ value: e.value, label: e.label, nroDoc: "" })
         if (combo == "d1")
-            setDelegado1({ value: e.value, label: e.label })
+            setDelegado1({ value: e.value, label: e.label, nroDoc: "" })
         if (combo == "d2")
-            setDelegado2({ value: e.value, label: e.label })
+            setDelegado2({ value: e.value, label: e.label, nroDoc: "" })
         if (combo == "jugador")
             setJugador(e.value)
     }
 
     const onChangeSelectedOption = (e: any, combo: string) => {
-            setSelectedOption(e, combo)
-        };
+        setSelectedOption(e, combo)
+    };
 
     const resizeFile = (file: any) =>
         new Promise((resolve) => {
@@ -188,54 +129,48 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
         }
     };
 
-
     const insert = (data: IEquipo) => {
-
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-
-
-        const raw = JSON.stringify({
-            "equipo": data,
-            "dt": dtSelect,
-            "d1": delegado1,
-            "d2": delegado2,
-            "escudo": file,
-            "jugadores": jugadores
-        });
-
-        const requestOptions = {
-            method: "POST",
-            headers: myHeaders,
-            body: raw
-        };
-
-        fetch("http://localhost/laff/api.php?request=equipo", requestOptions)
-            .then((response) => response.text())
-            .then((result) => {
-                alert(result)
-                navigate("/equipos")
-            })
-            .catch((error) => console.error(error));
+        data.dt = dtSelect.value
+        data.d1 = delegado1.value
+        data.d2 = delegado2.value
+        data.escudo = file
+        data.jugadores = jugadores.filter(x => x.id !== 0)
+        data.division = division
+        callFetch("equipo", "POST", data, null)
+        navigate("/equipos")
     }
 
     const agregarJugador = (id: number) => {
-        const requestOptions = {
-            method: "GET"
-        };
+
+        //Validar
 
         if (id > 0) {
             const check = jugadores.find(i => i.id === id)
 
-            if (check == undefined)
-                fetch("http://localhost/laff/api.php?request=persona_getbyid&id=" + id, requestOptions)
+            if (check == undefined) {
+
+                const myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append(
+                  "Authorization",
+                  "Bearer " + localStorage.getItem("token")
+                );
+            
+                const requestOptions = {
+                  method: "GET",
+                  headers: myHeaders,
+                };
+
+                fetch(appSetting.urlApi + "/laff/api.php?request=persona_getbyid&id=" + id, requestOptions)
                     .then((response) => response.json())
                     .then((result) => {
+                        console.log(result)
                         const newJugador = { ...result[0], accion: "A", deBase: false }
                         setJugadores([...jugadores, newJugador])
                     }
                     )
                     .catch((error) => alert(error));
+            }
             else {
                 setJugadores((jugadores) =>
                     jugadores.map((item) =>
@@ -260,18 +195,17 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
 
     const limpiar = (combo: string) => {
         if (combo == "dt") {
-            setDtSelect({ value: 0, label: "Seleccione un dt" })
+            setDtSelect({ value: 0, label: "Seleccione un dt", nroDoc: "" })
         }
         if (combo == "d1") {
-            setDelegado1(delObj)
+            setDelegado1({ value: 0, label: "Seleccione un delegado", nroDoc: "" })
         }
         if (combo == "d2") {
-            setDelegado2(delObj)
+            setDelegado2({ value: 0, label: "Seleccione un delegado", nroDoc: "" })
         }
         return;
     }
 
-    
     return (
         <section className="mt-4">
             <div className="container">
@@ -337,18 +271,22 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
                                     </div>
                                 </div>
                             </div>
-                            <label className="col-form-label">DT:</label>
                             <div className="row">
-                                <div className="col">
-                                    <div className="mb-3">
-                                        <AsyncSelect
-                                            noOptionsMessage={() => 'No se encontraron datos'}
-                                            loadingMessage={() => 'Buscando . . .'}
-                                            value={dtSelect}
-                                            loadOptions={(e) => loadOptions(e)} onChange={(e) => onChangeSelectedOption(e, "dt")} />
+                                <div className="row">
+                                    <div className="col-12">
+                                        <div className="mb-3">
+                                            <label className="col-form-label">División:</label>
+                                            <select className="form-control" value={division} onChange={manejarCambio}>
+                                                <option value="0">Ninguna</option>
+                                                {
+                                                    divisiones.map((division) => (
+                                                        <option key={division.id} value={division.id}>{division.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="col"><button className="btn btn-danger" type="button" onClick={() => limpiar("dt")}>X</button></div>
                             </div>
                             <label className="col-form-label">Delegado:</label>
                             <div className="row">
@@ -363,7 +301,7 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
                                 </div>
                                 <div className="col"><button className="btn btn-danger" type="button" onClick={() => limpiar("d1")}>X</button></div>
                             </div>
-                            <label className="col-form-label">Delegado 2:</label>
+                            <label className="col-form-label">Subdelegado:</label>
                             <div className="row">
                                 <div className="col">
                                     <div className="mb-3">
@@ -375,6 +313,19 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
                                     </div>
                                 </div>
                                 <div className="col"><button className="btn btn-danger" type="button" onClick={() => limpiar("d2")}>X</button></div>
+                            </div>
+                            <label className="col-form-label">DT:</label>
+                            <div className="row">
+                                <div className="col">
+                                    <div className="mb-3">
+                                        <AsyncSelect
+                                            noOptionsMessage={() => 'No se encontraron datos'}
+                                            loadingMessage={() => 'Buscando . . .'}
+                                            value={dtSelect}
+                                            loadOptions={(e) => loadOptions(e)} onChange={(e) => onChangeSelectedOption(e, "dt")} />
+                                    </div>
+                                </div>
+                                <div className="col"><button className="btn btn-danger" type="button" onClick={() => limpiar("dt")}>X</button></div>
                             </div>
                         </div>
                     </div>
@@ -411,14 +362,15 @@ const EquipoFicha = ({ equipoParam }: FichaEquip) => {
                                 <tbody>
                                     {
                                         //.filter((x) => x.accion == "A")
-                                        jugadores.length < 1 ? <p>No hay jugadores</p> :    
-                                        jugadores.map((j: IPersona, i: number) =>
+                                        jugadores.length < 1 ? <p>No hay jugadores</p> :
+                                            jugadores.filter(x => x.id !== 0).map((j: IPersona, i: number) =>
                                             (
                                                 <tr key={i}>
                                                     <td>{j.id}</td>
                                                     <td>{j.apellido}, {j.nombre}</td>
                                                     <td>{j.nroDoc}</td>
-                                                    <td>{j.accion}</td>
+                                                    <td>{j.accion == "A" ? "Nuevo" :
+                                                        j.accion == "B" ? "Eliminar" : ""}</td>
                                                     <td>
                                                         <button type="button" className="btn btn-danger float-end"
                                                             onClick={() => eliminar(j.id)}

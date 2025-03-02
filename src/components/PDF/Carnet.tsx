@@ -5,14 +5,12 @@ import { useLocation } from "react-router";
 const Carnet = () => {
 
     const location = useLocation(); // useLocation para acceder al estado
-    const { persona } = location.state || {}; // Accede al estado pasado
-    
-    console.log(persona)
-    
+    const { persona, carnet, ficha } = location.state || {}; // Accede al estado pasado
+
     return (
         <div className="container">
-            <PDFViewer width={800} height={800}>
-                <Pdf persona = { persona }/>
+            <PDFViewer width={"100%"} height={window.innerHeight-56}>
+                <Pdf persona = { persona } carnet = {carnet} ficha ={ficha}/>
             </PDFViewer>
         </div>
 

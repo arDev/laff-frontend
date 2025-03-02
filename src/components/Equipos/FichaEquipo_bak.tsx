@@ -9,6 +9,7 @@ import AsyncSelect from "react-select/async";
 import FileResizer from "react-image-file-resizer";
 import { ErrorMessage } from "@hookform/error-message";
 import Requerido from "../MsgCampos/Requerido";
+import { appSetting } from "../../settings/appSettings";
 //import { IPersona } from "../../interfaces/IPersona";
 declare var bootstrap: any;
 
@@ -65,7 +66,7 @@ const FichaEquipo = ({ equipo }: FichaEquip) => {
             headers: myHeaders,
         };
 
-        const response = await fetch("http://localhost/laff/api.php?request=persona&filtro=" + inputValue, requestOptions)
+        const response = await fetch(appSetting.urlApi + "/laff/api.php?request=persona&filtro=" + inputValue, requestOptions)
         const data = await response.json()
 
         return data
@@ -141,7 +142,7 @@ const FichaEquipo = ({ equipo }: FichaEquip) => {
             body: raw
         };
 
-        fetch("http://localhost/laff/api.php?request=equipo", requestOptions)
+        fetch(appSetting.urlApi + "/laff/api.php?request=equipo", requestOptions)
             .then((response) => response.text())
             .then((result) => console.log(result))
             .catch((error) => console.error(error));

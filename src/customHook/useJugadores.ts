@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { IPersona } from "../interfaces/IPersona";
+import { appSetting } from "../settings/appSettings";
 
 
     export const useJugadores = (filtro:string) => {
@@ -15,12 +16,12 @@ import { IPersona } from "../interfaces/IPersona";
             headers: myHeaders,
         };
         
-        fetch("http://localhost/laff/api.php?request=persona&filtro=" + filtro, requestOptions)
+        fetch(appSetting.urlApi + "/laff/api.php?request=persona&filtro=" + filtro, requestOptions)
             .then((response) => response.json())
             .then((result) => setJugadores(result))
             .catch((error) => console.error(error));
     }, [filtro]);
 
-    return { jugadores }
+    return { jugadores, setJugadores }
 
     }

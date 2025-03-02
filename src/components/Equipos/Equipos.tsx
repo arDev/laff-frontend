@@ -1,23 +1,31 @@
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { IEquipo } from "../../interfaces/IEquipo";
-import { useState } from "react";
-import { useEquipos } from "../../customHook/useEquipos";
+import { useEffect } from "react";
 import Busqueda from "../Busqueda/Busqueda";
 import { Link, useNavigate } from "react-router";
+import useAPI from "../../customHook/useAPI";
 
 function Equipos() {
     const navigate = useNavigate();
-    const [busqueda, setBusqueda] = useState<string>("")
+    const {data, callFetch} = useAPI<IEquipo>();
 
-    const { equipos } = useEquipos(busqueda);
+    const getEquipos = () =>
+    {
+        callFetch("equipo","GET",null,null)
+    }
+
+    useEffect(() => {
+        getEquipos()
+    }
+    ,[])
 
     const handleChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            setBusqueda(e.currentTarget.value)
+            callFetch("equipo","GET",null,"&filtro=" + e.currentTarget.value)
         }
         if (e.key === 'Escape') {
-            setBusqueda("")
             e.currentTarget.value = ""
+            getEquipos()
         }
     }
 
@@ -25,7 +33,9 @@ function Equipos() {
         navigate("/equipos/nuevo")
     }
 
-
+    function borrarEquipo(equip :IEquipo) {
+        callFetch("equipo","DELETE",equip,null)
+    }
 
     return (
         <section className="mt-4">
@@ -36,8 +46,8 @@ function Equipos() {
                     onKeyDownHandle={handleChange}
                 />
                 <div className="mb-4">
-                    Se encontraron {equipos.length} resultados
-                    <button className="btn btn-primary float-end" onClick={() => handleClickNuevo()} >Nuevo</button>
+                    Se encontraron {data?.length} resultados
+                    <button className="btn btn-primary float-end" onClick={() => handleClickNuevo()} >Nuevo Equipo</button>
                 </div>
                 <hr />
                 <table className="table">
@@ -47,12 +57,12 @@ function Equipos() {
                             <th scope="col">Nombre</th>
                             <th scope="col">Orden</th>
                             <th scope="col">Detalles</th>
-                            <th></th>
+                            <th scope="col"><div className="float-end">Acciones</div></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {equipos.length < 1 ? <></> :
-                            equipos.map((equipo: IEquipo, i: number) =>
+                        { data === null || data.length < 1 ? <></> :
+                            data.map((equipo: IEquipo, i: number) =>
                             (
                                 <tr key={i}>
                                     <td>{equipo.id}</td>
@@ -60,9 +70,10 @@ function Equipos() {
                                     <td>{equipo.orden}</td>
                                     <td>{equipo.detalles}</td>
                                     <td>
-                                    <div className="float-end">
+                                        <div className="float-end">
                                             <Link to="/equipos/nuevo" className="btn btn-secondary me-1  " state={{ equipo: equipo }} ><i className="bi bi-pencil-square"></i></Link>
-                                            <button type="button" className="btn btn-danger float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                            <Link to="/listadojugadores" className="btn btn-secondary me-1 " state={{ equipo: equipo }} ><i className="bi bi-person-vcard"></i></Link>
+                                            <button type="button" className="btn btn-danger float-end" onClick={() => borrarEquipo(equipo)}>
                                                 <i className="bi bi-arrow-down-square"></i>
                                             </button>
                                         </div>
